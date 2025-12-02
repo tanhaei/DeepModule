@@ -3,6 +3,7 @@ from .model import DeepModuleNet
 from .losses import CompositeLoss
 from .trainer import DeepModuleTrainer
 
+# Define exported modules
 __all__ = [
     'JavaProjectDataset', 
     'DeepModuleNet', 

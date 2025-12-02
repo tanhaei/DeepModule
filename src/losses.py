@@ -9,7 +9,10 @@ class CompositeLoss(torch.nn.Module):
         self.gamma_bal = gamma_bal
 
     def modularity_loss(self, s, edge_index, num_nodes):
-        """Minimizes inter-cluster coupling (Relaxed Normalized Cut)."""
+        """
+        Minimizes inter-cluster coupling (Relaxed Normalized Cut).
+        Optimizes for high intra-cluster density.
+        """
         adj = to_dense_adj(edge_index, max_num_nodes=num_nodes)[0]
         degrees = torch.sum(adj, dim=1)
         d = torch.diag(degrees)
@@ -23,8 +26,8 @@ class CompositeLoss(torch.nn.Module):
         return -1 * (intra_assoc / degree_assoc)
 
     def semantic_loss(self, s, x):
-        """Maximizes semantic cohesion within clusters."""
-        # Calculate centroids: (K, F)
+        """Maximizes semantic cohesion within clusters by penalizing distance to centroids."""
+        # Calculate cluster centroids: (K, F)
         numerator = torch.matmul(s.t(), x)
         denominator = torch.sum(s, dim=0).unsqueeze(1) + 1e-10
         centroids = numerator / denominator
@@ -34,15 +37,17 @@ class CompositeLoss(torch.nn.Module):
         for k in range(s.shape[1]):
             cluster_prob = s[:, k]
             centroid = centroids[k]
+            # Cosine similarity
             sim = F.cosine_similarity(x, centroid.unsqueeze(0), dim=1)
+            # Weighted loss
             loss += torch.sum(cluster_prob * (1 - sim))
             
         return loss / x.shape[0]
 
     def balance_loss(self, s):
-        """KL Divergence to ensure balanced clusters."""
-        p = torch.mean(s, dim=0) # Current distribution
-        u = torch.ones(s.shape[1]).to(s.device) / s.shape[1] # Uniform target
+        """Uses KL Divergence to ensure balanced cluster sizes and avoid trivial solutions."""
+        p = torch.mean(s, dim=0) # Current cluster distribution
+        u = torch.ones(s.shape[1]).to(s.device) / s.shape[1] # Target Uniform distribution
         return F.kl_div(torch.log(p + 1e-10), u, reduction='sum')
 
     def forward(self, s, x, edge_index, num_nodes):
@@ -50,5 +55,6 @@ class CompositeLoss(torch.nn.Module):
         l_sem = self.semantic_loss(s, x)
         l_bal = self.balance_loss(s)
         
+        # Weighted sum of losses
         total = l_mod + (self.lambda_sem * l_sem) + (self.gamma_bal * l_bal)
         return total, l_mod, l_sem, l_bal

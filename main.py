@@ -32,7 +32,7 @@ def main():
     trainer = DeepModuleTrainer(data, num_clusters=args.clusters, device_name='cuda' if torch.cuda.is_available() else 'cpu')
     trainer.train(epochs=args.epochs)
 
-    # 3. Inference & Saving
+    # 3. Inference & Saving Results
     print("--- Generating Recommendations ---")
     recommendations = trainer.predict()
     

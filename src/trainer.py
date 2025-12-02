@@ -11,29 +11,33 @@ class DeepModuleTrainer:
         
         # Initialize Model
         self.model = DeepModuleNet(
-            in_channels=768, 
+            in_channels=768, # Default CodeBERT embedding size
             hidden_channels=256, 
             out_channels=128, 
             num_clusters=num_clusters
         ).to(self.device)
         
-        # Initialize Loss & Optimizer
+        # Initialize Loss Function & Optimizer
         self.criterion = CompositeLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.005, weight_decay=5e-4)
 
     def train(self, epochs=100):
+        """Main training loop."""
         self.model.train()
         print(f"Starting training on {self.device}...")
         
         for epoch in range(epochs):
             self.optimizer.zero_grad()
             
+            # Forward pass
             s, _ = self.model(self.data.x, self.data.edge_index)
             
+            # Compute losses
             loss, l_mod, l_sem, l_bal = self.criterion(
                 s, self.data.x, self.data.edge_index, self.data.num_nodes
             )
             
+            # Backpropagation
             loss.backward()
             self.optimizer.step()
             
@@ -43,6 +47,7 @@ class DeepModuleTrainer:
         print("Training finished.")
 
     def predict(self):
+        """Inference step to generate cluster assignments."""
         self.model.eval()
         with torch.no_grad():
             s, _ = self.model(self.data.x, self.data.edge_index)
