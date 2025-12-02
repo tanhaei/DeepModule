@@ -4,6 +4,7 @@
 
 ## **📂 Project Structure**
 
+```
 DeepModule/  
 ├── src/                     \# Main source code  
 │   ├── \_\_init\_\_.py  
@@ -15,19 +16,23 @@ DeepModule/
 ├── main.py                  \# Main entry point (CLI)  
 ├── requirements.txt         \# Project dependencies  
 └── README.md                \# Documentation
+```
 
 ## **🚀 Quick Start Guide**
 
 ### **Installation**
 
 Install the required dependencies:
-
+```
 pip install \-r requirements.txt
+```
 
 ### **Running the Pipeline**
 
 To run the full pipeline (data processing, training, and output generation), use the following command:
 
+```
 python main.py \--project\_dir ./path\_to\_your\_java\_project
+```
 
 Final results will be saved in refactoring\_suggestions.csv.
