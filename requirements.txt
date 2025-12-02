@@ -1,0 +1,1 @@
+torch>=1.10.0torch-geometric>=2.0.0transformers>=4.10.0networkx>=2.6javalang>=0.13.0scikit-learn>=1.0numpytqdm
