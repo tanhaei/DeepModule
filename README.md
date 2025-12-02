@@ -1,31 +1,33 @@
 # **DeepModule: Learning to Refactor Software Architectures**
 
-**DeepModule** یک فریم‌ورک متن‌باز مبتنی بر GNN است که با ترکیب تحلیل ساختاری و معنایی، معماری نرم‌افزار را بهینه‌سازی کرده و کاندیداهای میکروسرویس را پیشنهاد می‌دهد.
+**DeepModule** is an open-source framework based on Graph Neural Networks (GNNs) that optimizes software architecture and suggests microservice candidates by combining structural and semantic analysis of the source code.
 
-## **📂 ساختار پروژه**
+## **📂 Project Structure**
 
 DeepModule/  
-├── src/                     \# سورس کدهای اصلی پروژه  
+├── src/                     \# Main source code  
 │   ├── \_\_init\_\_.py  
-│   ├── data\_loader.py       \# پیش‌پردازش کد، کار با CodeBERT و ساخت گراف  
-│   ├── model.py             \# معماری شبکه عصبی (GAT \+ Soft Clustering)  
-│   ├── losses.py            \# توابع هزینه (Modularity, Semantic, Balance)  
-│   └── trainer.py           \# کلاس مدیریت آموزش و ارزیابی  
+│   ├── data\_loader.py       \# Data preprocessing, CodeBERT handling, and graph construction  
+│   ├── model.py             \# Neural network architecture (GAT \+ Soft Clustering)  
+│   ├── losses.py            \# Loss functions (Modularity, Semantic, Balance)  
+│   └── trainer.py           \# Training and evaluation manager  
 │  
-├── main.py                  \# نقطه ورود اصلی برنامه (CLI)  
-├── requirements.txt         \# وابستگی‌های پروژه  
-└── README.md                \# مستندات
+├── main.py                  \# Main entry point (CLI)  
+├── requirements.txt         \# Project dependencies  
+└── README.md                \# Documentation
 
-## **🚀 راهنمای اجرا**
+## **🚀 Quick Start Guide**
 
-### **نصب پیش‌نیازها**
+### **Installation**
+
+Install the required dependencies:
 
 pip install \-r requirements.txt
 
-### **اجرای کل پایپ‌لاین**
+### **Running the Pipeline**
 
-برای اجرای کامل فرآیند (پردازش داده، آموزش و تولید خروجی) از دستور زیر استفاده کنید:
+To run the full pipeline (data processing, training, and output generation), use the following command:
 
 python main.py \--project\_dir ./path\_to\_your\_java\_project
 
-نتایج نهایی در فایل refactoring\_suggestions.csv ذخیره خواهند شد.
+Final results will be saved in refactoring\_suggestions.csv.
