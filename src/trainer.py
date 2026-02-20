@@ -9,51 +9,48 @@ class DeepModuleTrainer:
         self.data = data.to(self.device)
         self.num_clusters = num_clusters
         
-        # Initialize Model
         self.model = DeepModuleNet(
-            in_channels=768, # Default CodeBERT embedding size
+            in_channels=768, 
             hidden_channels=256, 
             out_channels=128, 
             num_clusters=num_clusters
         ).to(self.device)
         
-        # Initialize Loss Function & Optimizer
         self.criterion = CompositeLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.005, weight_decay=5e-4)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.005)
 
-    def train(self, epochs=100):
-        """Main training loop."""
+    def train(self, epochs=100, checkpoint_path="model_checkpoint.pt"):
         self.model.train()
-        print(f"Starting training on {self.device}...")
-        
+        best_loss = float('inf')
+
         for epoch in range(epochs):
-            self.optimizer.zero_grad()
-            
-            # Forward pass
-            s, _ = self.model(self.data.x, self.data.edge_index)
-            
-            # Compute losses
-            loss, l_mod, l_sem, l_bal = self.criterion(
-                s, self.data.x, self.data.edge_index, self.data.num_nodes
-            )
-            
-            # Backpropagation
-            loss.backward()
-            self.optimizer.step()
-            
-            if epoch % 10 == 0:
-                print(f"Epoch {epoch:03d} | Loss: {loss.item():.4f} (Mod: {l_mod.item():.2f}, Sem: {l_sem.item():.2f}, Bal: {l_bal.item():.2f})")
-        
-        print("Training finished.")
+            try:
+                self.optimizer.zero_grad()
+                s, _ = self.model(self.data.x, self.data.edge_index)
+                loss, l_mod, l_sem, l_bal = self.criterion(
+                    s, self.data.x, self.data.edge_index, self.data.num_nodes
+                )
+                
+                if torch.isnan(loss):
+                    print("Error: NaN loss detected. Rolling back to previous state.")
+                    break
+
+                loss.backward()
+                self.optimizer.step()
+
+                if loss < best_loss:
+                    best_loss = loss
+                    torch.save(self.model.state_dict(), checkpoint_path)
+
+                if epoch % 10 == 0:
+                    print(f"Epoch {epoch:03d} | Loss: {loss.item():.4f}")
+            except Exception as e:
+                print(f"Training interrupted at epoch {epoch}: {e}")
+                break
 
     def predict(self):
-        """Inference step to generate cluster assignments."""
         self.model.eval()
         with torch.no_grad():
             s, _ = self.model(self.data.x, self.data.edge_index)
             predictions = torch.argmax(s, dim=1)
-            
-        results = {}
-        for i, class_name in enumerate(self.data.class_names):
-            results[class_name] = predictions[i].item()
-        return results
+        return {name: predictions[i].item() for i, name in enumerate(self.data.class_names)}
