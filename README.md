@@ -47,7 +47,7 @@ pip install -r requirements.txt
 To run the full pipeline (data processing, training, and output generation), use the following command:
 
 ```bash
-python main.py \--project\_dir ./path\_to\_your\_java\_project
+python main.py --project_dir ./path_to_your_java_project
 ```
 
-Final results will be saved in refactoring\_suggestions.csv.
+Final results will be saved in refactoring_suggestions.csv.
