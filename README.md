@@ -4,11 +4,13 @@
 
 ## **📂 Project Structure**
 
+
+```
 DeepModule/  
 ├── src/                     \# Main source code  
-│   ├── \_\_init\_\_.py  
-│   ├── data\_loader.py       \# Data preprocessing, CodeBERT handling, and graph construction  
-│   ├── model.py             \# Neural network architecture (GAT \+ Soft Clustering)  
+│   ├── __init__.py  
+│   ├── data_loader.py       \# Data preprocessing, CodeBERT handling, and graph construction  
+│   ├── model.py             \# Neural network architecture (GAT + Soft Clustering)  
 │   ├── losses.py            \# Loss functions (Modularity, Semantic, Balance)  
 │   └── trainer.py           \# Training and evaluation manager  
 │  
@@ -16,6 +18,7 @@ DeepModule/
 ├── main.py                  \# Main entry point (CLI)  
 ├── requirements.txt         \# Project dependencies  
 └── README.md                \# Documentation
+```
 
 ## **🚀 Quick Start Guide**
 
