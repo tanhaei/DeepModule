@@ -7,17 +7,17 @@
 
 ```
 DeepModule/  
-├── src/                     \# Main source code  
+├── src/                     # Main source code  
 │   ├── __init__.py  
-│   ├── data_loader.py       \# Data preprocessing, CodeBERT handling, and graph construction  
-│   ├── model.py             \# Neural network architecture (GAT + Soft Clustering)  
-│   ├── losses.py            \# Loss functions (Modularity, Semantic, Balance)  
-│   └── trainer.py           \# Training and evaluation manager  
+│   ├── data_loader.py       # Data preprocessing, CodeBERT handling, and graph construction  
+│   ├── model.py             # Neural network architecture (GAT + Soft Clustering)  
+│   ├── losses.py            # Loss functions (Modularity, Semantic, Balance)  
+│   └── trainer.py           # Training and evaluation manager  
 │  
-├── generate_dummy_data.py   \# Generate dummy data 
-├── main.py                  \# Main entry point (CLI)  
-├── requirements.txt         \# Project dependencies  
-└── README.md                \# Documentation
+├── generate_dummy_data.py   # Generate dummy data 
+├── main.py                  # Main entry point (CLI)  
+├── requirements.txt         # Project dependencies  
+└── README.md                # Documentation
 ```
 
 ## **🚀 Quick Start Guide**
