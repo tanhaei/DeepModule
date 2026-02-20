@@ -42,13 +42,16 @@ class DeepModuleTrainer:
                 print(f"Training error at epoch {epoch}: {e}")
                 break
 
-    def predict(self):
-        self.model.eval()
-        with torch.no_grad():
-            s, embeddings = self.model(self.data.x, self.data.edge_index)
-            predictions = torch.argmax(s, dim=1).cpu().numpy()
-        np.save("embeddings.npy", embeddings.cpu().numpy())
-        return {name: int(predictions[i]) for i, name in enumerate(self.data.class_names)}
+	def predict(self):
+        results = {name: int(predictions[i]) for i, name in enumerate(self.data.class_names)}
+        
+        # === NEW: Behavior Preservation (Reviewer #2) ===
+        from src.behavior_preservation import BehaviorPreserver
+        preserver = BehaviorPreserver(self.data, results)
+        preserver.generate_test_skeletons()
+        preserver.differential_symbolic_check()
+        
+        return results
 
     def evaluate(self, ground_truth_dict):
         pred_dict = self.predict()
