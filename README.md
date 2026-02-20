@@ -38,12 +38,16 @@ python main.py --project_dir ./example_project --clusters
 
 Install the required dependencies:
 
-pip install \-r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
 ### **Running the Pipeline**
 
 To run the full pipeline (data processing, training, and output generation), use the following command:
 
+```bash
 python main.py \--project\_dir ./path\_to\_your\_java\_project
+```
 
 Final results will be saved in refactoring\_suggestions.csv.
