@@ -1,0 +1,25 @@
+{
+  "release": "v3.0",
+  "manuscript": "DeepModule: Learning to Refactor Software Architectures via Semantic-Aware Graph Neural Networks",
+  "root_directory": "data/releases/v3.0",
+  "files": [
+    "README.md",
+    "source_code_links.csv",
+    "ground_truth_summary.csv",
+    "expert_rubric.md",
+    "expert_feedback/ant_fb.json",
+    "expert_feedback/hadoop_fb.json",
+    "expert_feedback/spring_fb.json",
+    "expert_feedback/mybatis_fb.json",
+    "expert_feedback/eclipse_fb.json",
+    "expert_feedback/tomcat_fb.json",
+    "benchmark_outputs/comparative_results_mojofm.csv",
+    "benchmark_outputs/ablation_results.csv",
+    "benchmark_outputs/cross_language_results.csv",
+    "boundary_reports/boundary_analysis_evidence.csv",
+    "figures_data/filtering_mojofm.csv",
+    "figures_data/sensitivity_lambda.csv",
+    "figures_data/training_convergence.csv",
+    "schemas/output_schema.md"
+  ]
+}

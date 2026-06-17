@@ -1,0 +1,7 @@
+{
+  "project": "Hadoop",
+  "experts": 5,
+  "cohens_kappa": 0.82,
+  "feedback_collected": "Service feasibility",
+  "summary": "Experts favored isolating MapReduce data-flow classes from UI and security modules to reduce cross-responsibility coupling."
+}

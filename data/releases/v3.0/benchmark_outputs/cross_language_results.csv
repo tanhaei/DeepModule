@@ -1,0 +1,7 @@
+Dataset_subset,Language,Domain,Nodes_files,Mean_MoJoFM,Drop_vs_Java_mean
+Qualitas six-project mean,Java,Mixed software systems,2775,83.7,0.0
+BigCode Java subset,Java,Mixed repositories,14200,82.5,1.2
+BigCode Python subset,Python,Mixed repositories,11500,79.4,4.3
+BigCode C++ subset,C++,Mixed repositories,9800,77.8,5.9
+Large-project subset,Java,Projects > 400k LOC,4033,81.6,2.1
+Small-project subset,Java,Projects < 200k LOC,925,84.9,-1.2

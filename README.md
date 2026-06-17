@@ -56,3 +56,13 @@ A full Tree-sitter/CodeBERT setup can be plugged in for publication-scale experi
 ```bash
 python main.py --project_dir /path/to/java/project --clusters 12 --epochs 100 --ground_truth expert_reference.csv --output_dir outputs
 ```
+
+## Manuscript v3.0 replication package
+
+The manuscript-level replication package is available under:
+
+```text
+data/releases/v3.0
+```
+
+It contains source-code links, expert-rubric summaries, anonymized expert-feedback files, MoJoFM comparison outputs, component-ablation outputs, cross-language generalization outputs, boundary-analysis evidence, figure data, and output schemas.

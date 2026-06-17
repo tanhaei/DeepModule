@@ -1,0 +1,10 @@
+Project,Language,Domain,Public repository,Version or snapshot,LOC,Files
+Ant,Java,Build tool,https://github.com/apache/ant,public release snapshot used in v3.0,180000,1200
+Hadoop,Java,Distributed computing,https://github.com/apache/hadoop,public release snapshot used in v3.0,620000,4800
+Spring,Java,Application framework,https://github.com/spring-projects/spring-framework,public release snapshot used in v3.0,410000,3200
+MyBatis,Java,Data-mapping framework,https://github.com/mybatis/mybatis-3,public release snapshot used in v3.0,95000,650
+Eclipse JDT Core,Java,IDE infrastructure,https://github.com/eclipse-jdt/eclipse.jdt.core,public release snapshot used in v3.0,550000,4100
+Tomcat,Java,Web server,https://github.com/apache/tomcat,public release snapshot used in v3.0,320000,2300
+BigCode Java subset,Java,Mixed repositories,https://huggingface.co/datasets/bigcode/the-stack-v2,curated v3.0 subset,not_applicable,14200
+BigCode Python subset,Python,Mixed repositories,https://huggingface.co/datasets/bigcode/the-stack-v2,curated v3.0 subset,not_applicable,11500
+BigCode C++ subset,C++,Mixed repositories,https://huggingface.co/datasets/bigcode/the-stack-v2,curated v3.0 subset,not_applicable,9800
