@@ -1,59 +1,58 @@
-# **DeepModule: Modularization Recommendation Framework for Java Monoliths**
+# DeepModule: Semantic-Aware Architecture Modularization
 
-DeepModule is an **unsupervised** Graph Neural Network framework that recommends architecturally coherent module groupings (candidate microservice boundaries) by combining structural dependencies extracted via production-ready javalang AST parsing and semantic embeddings from CodeBERT.
+DeepModule is an unsupervised framework for architecture-level modularization of monolithic Java systems. It builds a directed software dependency graph, enriches nodes with semantic embeddings, learns dependency-aware representations with a Graph Attention Network, and outputs candidate module/microservice boundaries for human review.
 
-**Important Scope Clarification** (addressing reviewer feedback):
-- The tool **suggests modularization candidates** to support refactoring and microservice identification.
-- It does **NOT** perform actual code transformations or guarantee runtime behavior preservation (latency, data consistency, transaction management, etc.).
-- All recommendations must be reviewed and implemented by developers.
+## Scope
 
-## 📂 Project Structure
+- DeepModule recommends architecture-level module boundaries.
+- It does not automatically transform source code.
+- It does not guarantee runtime migration properties such as latency, data ownership, distributed transactions, or eventual consistency.
+- The boundary report and generated JUnit skeletons are review artifacts, not formal behavior-equivalence proofs.
 
+## Manuscript-aligned implementation details
 
-```
-DeepModule/  
-├── src/                     # Main source code  
-│   ├── __init__.py  
-│   ├── data_loader.py       # Data preprocessing, CodeBERT handling, and graph construction  
-│   ├── model.py             # Neural network architecture (GAT + Soft Clustering)  
-│   ├── losses.py            # Loss functions (Modularity, Semantic, Balance)  
-│   └── trainer.py           # Training and evaluation manager  
-│  
-├── generate_dummy_data.py   # Generate dummy data 
-├── main.py                  # Main entry point (CLI)  
-├── requirements.txt         # Project dependencies  
-└── README.md                # Documentation
-```
+- Directed dependency graph from imports, type references, object creation, and inheritance.
+- Semantic node vectors from CodeBERT when available, with deterministic hashed embeddings as an offline fallback.
+- Two-layer GAT encoder with 8 attention heads in the first layer.
+- Differentiable soft clustering head.
+- Composite objective: directed modularity + semantic consistency + cluster balance.
+- Defaults: `lambda=0.7`, `gamma=0.1`, `beta=0.05`, `epochs=100`, `lr=0.005`.
+- Explicit preprocessing log for excluded/generated/test/vendor/short files.
 
-## **🚀 Quick Start Guide**
-
-### **Installation**
-
-Install the required dependencies:
+## Install
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### **Generate Example Project**
+The lightweight smoke test runs without `transformers`, `javalang`, or `torch-geometric`; those packages are optional for full experiments.
+
+## Smoke test
+
 ```bash
 python generate_dummy_data.py
+python main.py --project_dir ./example_project --clusters 3 --epochs 5 --ground_truth ground_truth.csv --no_codebert --output_dir outputs_smoke
 ```
 
-### **Running the Pipeline**
+Expected outputs:
 
-To run the full pipeline (data processing, training, and output generation), use the following command:
+- `outputs_smoke/modularization_recommendations.csv`
+- `outputs_smoke/embeddings.npy`
+- `outputs_smoke/boundary_report.csv`
+- `outputs_smoke/test_skeletons/`
+
+## Cross-language smoke mode
+
+For BigCode-style mixed subsets, use the lightweight regex parser mode:
 
 ```bash
-python main.py --project_dir ./example_project --clusters 3 --epochs 50
+python main.py --project_dir /path/to/subset --language mixed --auto_k --no_codebert
 ```
 
-### **Run with Expert Ground Truth Evaluation (optional)**
+A full Tree-sitter/CodeBERT setup can be plugged in for publication-scale experiments; the offline fallback keeps CI deterministic.
+
+## Full run
 
 ```bash
-python main.py --project_dir ./example_project --clusters 3 --ground_truth ground_truth.csv
+python main.py --project_dir /path/to/java/project --clusters 12 --epochs 100 --ground_truth expert_reference.csv --output_dir outputs
 ```
-
-
-Final results will be saved in `modularization_recommendations.csv` and `embeddings.npy` Learned node embeddings (for visualization/qualitative analysis).
-

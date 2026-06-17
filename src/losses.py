@@ -1,43 +1,61 @@
+"""Composite DeepModule objective from the revised manuscript."""
+
+from __future__ import annotations
+
 import torch
 import torch.nn.functional as F
-from torch_geometric.utils import to_dense_adj
+
 
 class CompositeLoss(torch.nn.Module):
-    def __init__(self, lambda_sem=0.8, gamma_bal=1.5):
+    def __init__(self, lambda_sem: float = 0.7, gamma_bal: float = 0.1, beta_entropy: float = 0.05, eps: float = 1e-10):
         super().__init__()
-        self.lambda_sem = lambda_sem
-        self.gamma_bal = gamma_bal
+        self.lambda_sem = float(lambda_sem)
+        self.gamma_bal = float(gamma_bal)
+        self.beta_entropy = float(beta_entropy)
+        self.eps = float(eps)
 
-    def modularity_loss(self, s, edge_index, num_nodes):
-        adj = to_dense_adj(edge_index, max_num_nodes=num_nodes)[0]
-        degrees = torch.sum(adj, dim=1)
-        d = torch.diag(degrees)
-        s_t = s.t()
-        intra_assoc = torch.trace(torch.matmul(torch.matmul(s_t, adj), s))
-        degree_assoc = torch.trace(torch.matmul(torch.matmul(s_t, d), s))
-        if degree_assoc == 0: return torch.tensor(0.0, device=s.device)
-        return -1 * (intra_assoc / degree_assoc)
+    @staticmethod
+    def dense_adjacency(edge_index: torch.Tensor, num_nodes: int, device: torch.device) -> torch.Tensor:
+        adjacency = torch.zeros((num_nodes, num_nodes), dtype=torch.float32, device=device)
+        if edge_index.numel() > 0:
+            src = edge_index[0].long().to(device)
+            dst = edge_index[1].long().to(device)
+            adjacency[src, dst] = 1.0
+        return adjacency
 
-    def semantic_loss(self, s, x):
-        numerator = torch.matmul(s.t(), x)
-        denominator = torch.sum(s, dim=0).unsqueeze(1) + 1e-10
-        centroids = numerator / denominator
-        loss = 0
-        for k in range(s.shape[1]):
-            cluster_prob = s[:, k]
-            centroid = centroids[k]
-            sim = F.cosine_similarity(x, centroid.unsqueeze(0), dim=1)
-            loss += torch.sum(cluster_prob * (1 - sim))
-        return loss / x.shape[0]
+    def modularity_loss(self, s: torch.Tensor, edge_index: torch.Tensor, num_nodes: int) -> torch.Tensor:
+        """Negative directed modularity for soft assignments.
 
-    def balance_loss(self, s):
-        p = torch.mean(s, dim=0)
-        u = torch.ones(s.shape[1]).to(s.device) / s.shape[1]
-        return F.kl_div(torch.log(p + 1e-10), u, reduction='sum')
+        Q_dir = (1/m) Tr(S^T B S), B_ij = A_ij - k_out_i k_in_j / m.
+        """
+        adjacency = self.dense_adjacency(edge_index, num_nodes, s.device)
+        m = adjacency.sum()
+        if m <= self.eps:
+            return torch.zeros((), dtype=s.dtype, device=s.device)
+        kout = adjacency.sum(dim=1, keepdim=True)
+        kin = adjacency.sum(dim=0, keepdim=True)
+        modularity_matrix = adjacency - (kout @ kin) / (m + self.eps)
+        q_dir = torch.trace(s.t() @ modularity_matrix @ s) / (m + self.eps)
+        return -q_dir
 
-    def forward(self, s, x, edge_index, num_nodes):
+    def semantic_loss(self, s: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+        centroids = (s.t() @ x) / (s.sum(dim=0).unsqueeze(1) + self.eps)
+        x_norm = F.normalize(x, p=2, dim=1, eps=self.eps)
+        c_norm = F.normalize(centroids, p=2, dim=1, eps=self.eps)
+        cosine = x_norm @ c_norm.t()
+        return torch.sum(s * (1.0 - cosine)) / x.shape[0]
+
+    def balance_loss(self, s: torch.Tensor) -> torch.Tensor:
+        p = s.mean(dim=0).clamp_min(self.eps)
+        p = p / p.sum()
+        u = torch.full_like(p, 1.0 / p.numel())
+        kl = torch.sum(p * (torch.log(p) - torch.log(u)))
+        entropy = -torch.sum(p * torch.log(p))
+        return kl - self.beta_entropy * entropy
+
+    def forward(self, s: torch.Tensor, x: torch.Tensor, edge_index: torch.Tensor, num_nodes: int):
         l_mod = self.modularity_loss(s, edge_index, num_nodes)
         l_sem = self.semantic_loss(s, x)
         l_bal = self.balance_loss(s)
-        total = l_mod + (self.lambda_sem * l_sem) + (self.gamma_bal * l_bal)
+        total = l_mod + self.lambda_sem * l_sem + self.gamma_bal * l_bal
         return total, l_mod, l_sem, l_bal

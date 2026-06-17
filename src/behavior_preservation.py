@@ -1,59 +1,117 @@
+"""Boundary reporting and lightweight interface checks.
+
+This module intentionally does not claim full behavior preservation. It creates
+review artifacts that correspond to the manuscript's static interface analysis:
+inter-cluster edges, dependency type, and JUnit skeletons for human review.
+"""
+
+from __future__ import annotations
+
+import csv
 import os
-import javalang
 from collections import defaultdict
+from typing import Dict, List, Optional
+
+import torch
+import torch.nn.functional as F
+
 
 class BehaviorPreserver:
-    def __init__(self, data, recommendations):
+    def __init__(self, data, recommendations: Dict[str, int], output_dir: str = "outputs", attention_matrix: Optional[torch.Tensor] = None) -> None:
         self.data = data
-        self.recommendations = recommendations  # {class_name: module_id}
+        self.recommendations = recommendations
+        self.output_dir = output_dir
+        self.attention_matrix = attention_matrix.detach().cpu() if attention_matrix is not None else None
         self.cluster_map = defaultdict(list)
-        for cls, mod in recommendations.items():
-            self.cluster_map[mod].append(cls)
+        for cls, module in recommendations.items():
+            self.cluster_map[module].append(cls)
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    def check_interfaces(self):
-        """Static interface checking (Spoon-like behavior using javalang)"""
-        violations = []
-        for i, path in enumerate(self.data.file_paths):
-            try:
-                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                    tree = javalang.parse.parse(f.read())
-                caller_mod = self.recommendations[self.data.class_names[i]]
-                for _, node in tree.filter(javalang.tree.MethodInvocation):
-                    callee = node.member
-                    if callee in self.recommendations:
-                        callee_mod = self.recommendations[callee]
-                        if caller_mod != callee_mod:
-                            violations.append(f"Cross-module call: {self.data.class_names[i]} → {callee} ({caller_mod} → {callee_mod})")
-            except:
-                pass
-        return violations
+    def boundary_edges(self) -> List[dict]:
+        rows: List[dict] = []
+        edge_index = self.data.edge_index.cpu()
+        dep_types = getattr(self.data, "dependency_types", [])
+        for col in range(edge_index.shape[1]):
+            src_idx = int(edge_index[0, col])
+            dst_idx = int(edge_index[1, col])
+            src = self.data.class_names[src_idx]
+            dst = self.data.class_names[dst_idx]
+            src_mod = self.recommendations[src]
+            dst_mod = self.recommendations[dst]
+            if src_mod == dst_mod:
+                continue
+            rows.append(
+                {
+                    "Source": src,
+                    "Target": dst,
+                    "Source_Module": src_mod,
+                    "Target_Module": dst_mod,
+                    "Dependency_Type": dep_types[col] if col < len(dep_types) else "unknown",
+                    "Attention_Weight": self._attention_weight(src_idx, dst_idx),
+                    "Semantic_Similarity": self._semantic_similarity(src_idx, dst_idx),
+                    "Suggested_Action": "review_cross_module_api_or_facade",
+                }
+            )
+        return rows
 
-    def generate_test_skeletons(self, output_dir="test_skeletons"):
-        """Auto-generate JUnit test skeletons for inter-cluster boundaries"""
-        os.makedirs(output_dir, exist_ok=True)
-        for mod_id, classes in self.cluster_map.items():
-            for cls in classes:
-                skeleton = f"""import org.junit.Test;
-public class {cls}BoundaryTest {{
+    def _attention_weight(self, src_idx: int, dst_idx: int) -> str:
+        if self.attention_matrix is None:
+            return "NA"
+        try:
+            return f"{float(self.attention_matrix[src_idx, dst_idx]):.6f}"
+        except Exception:
+            return "NA"
+
+    def _semantic_similarity(self, src_idx: int, dst_idx: int) -> str:
+        try:
+            x = self.data.x.detach().cpu()
+            sim = F.cosine_similarity(x[src_idx].unsqueeze(0), x[dst_idx].unsqueeze(0)).item()
+            return f"{sim:.6f}"
+        except Exception:
+            return "NA"
+
+    def write_boundary_report(self, filename: str = "boundary_report.csv") -> str:
+        path = os.path.join(self.output_dir, filename)
+        rows = self.boundary_edges()
+        fieldnames = [
+            "Source", "Target", "Source_Module", "Target_Module",
+            "Dependency_Type", "Attention_Weight", "Semantic_Similarity", "Suggested_Action",
+        ]
+        with open(path, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        return path
+
+    def generate_test_skeletons(self, output_subdir: str = "test_skeletons") -> str:
+        skeleton_dir = os.path.join(self.output_dir, output_subdir)
+        os.makedirs(skeleton_dir, exist_ok=True)
+        generated = 0
+        for row in self.boundary_edges():
+            cls = row["Source"]
+            target = row["Target"]
+            safe_name = f"{cls}To{target}BoundaryTest".replace("$", "_")
+            skeleton = f"""import org.junit.Test;
+
+public class {safe_name} {{
     @Test
-    public void testInterClusterCalls() {{
-        // TODO: Add assertions for calls to other modules
-        // Generated by DeepModule BehaviorPreserver
+    public void testBoundaryContract() {{
+        // Generated by DeepModule for architectural boundary review.
+        // Source module: {row['Source_Module']}; target module: {row['Target_Module']}.
+        // TODO: add assertions for the public API used across this boundary.
     }}
-}}"""
-                with open(f"{output_dir}/{cls}BoundaryTest.java", "w") as f:
-                    f.write(skeleton)
-        print(f"✅ {len(self.cluster_map)*len(next(iter(self.cluster_map.values())))} test skeletons generated in {output_dir}/")
+}}
+"""
+            with open(os.path.join(skeleton_dir, f"{safe_name}.java"), "w", encoding="utf-8") as handle:
+                handle.write(skeleton)
+            generated += 1
+        print(f"Generated {generated} boundary test skeleton(s) in {skeleton_dir}/")
+        return skeleton_dir
 
-    def differential_symbolic_check(self):
-        """Simple differential symbolic execution placeholder (real impl. needs Soot/KLEE)"""
-        print("🔍 Running lightweight symbolic boundary check...")
-        violations = self.check_interfaces()
-        if violations:
-            print("⚠️  Potential behavior changes detected:")
-            for v in violations[:5]:
-                print("   ", v)
-            print(f"   ... and {len(violations)-5} more")
+    def lightweight_interface_check(self) -> bool:
+        rows = self.boundary_edges()
+        if rows:
+            print(f"Detected {len(rows)} cross-module dependency/dependencies for review.")
         else:
-            print("✅ No critical cross-module violations detected.")
-        return len(violations) == 0
+            print("No cross-module dependencies detected under the current assignment.")
+        return True
