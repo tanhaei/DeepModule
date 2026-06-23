@@ -1,0 +1,7 @@
+Project,Test,Mean_Diff,Statistic,p_value,Significant_at_0.01
+Ant,paired Wilcoxon signed-rank,11.300,0.000,0.00195,yes
+Hadoop,paired Wilcoxon signed-rank,11.200,0.000,0.00195,yes
+Spring,paired Wilcoxon signed-rank,11.100,0.000,0.00195,yes
+MyBatis,paired Wilcoxon signed-rank,11.500,0.000,0.00195,yes
+Eclipse,paired Wilcoxon signed-rank,10.700,0.000,0.00195,yes
+Tomcat,paired Wilcoxon signed-rank,11.500,0.000,0.00195,yes

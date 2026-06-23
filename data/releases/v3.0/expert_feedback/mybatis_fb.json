@@ -1,0 +1,7 @@
+{
+  "project": "MyBatis",
+  "experts": 3,
+  "cohens_kappa": 0.88,
+  "feedback_collected": "Layering consistency",
+  "summary": "Experts supported separating cache responsibilities from executor flows to clarify transaction and persistence boundaries."
+}

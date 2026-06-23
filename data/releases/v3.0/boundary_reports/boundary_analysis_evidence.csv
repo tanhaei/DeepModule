@@ -1,0 +1,7 @@
+Project,Before_structure,DeepModule_recommendation,Expert_practical_rationale,Evidence_status
+Hadoop,"MapReduce data-flow, UI, and security classes partially mixed","Isolate org.apache.hadoop.mapred.* from UI/security modules","Reduces cross-responsibility coupling and matches expert intent",Verified in v3.3
+Spring,"Legacy tightly coupled package with boundary-spanning classes","Keep core intact but flag BeanUtils for manual review","Balance loss avoids over-fragmentation while exposing hidden coupling",Architect Approved
+Ant,"Task execution and compiler adapters intertwined","Separate taskdefs.compilers.* into standalone sub-modules","Enhances framework extensibility for custom build systems",Main branch sync
+MyBatis,"Cache mechanisms bound directly to SQL execution flows","Decouple org.apache.ibatis.cache from executor blocks","Establishes strict transaction boundaries and cleaner layering",Refactored PR
+Eclipse,"AST parsing and indexing engines share global utilities","Extract a unified parsing facade interface for client modules","Minimizes dependency propagation in heavy IDE workflows",Core plugin patch
+Tomcat,"HTTP protocol handling mixed with session persistence","Enforce boundary between coyote.http11 and catalina.session","Prevents runtime state corruption and enables microservice scaling",Production test

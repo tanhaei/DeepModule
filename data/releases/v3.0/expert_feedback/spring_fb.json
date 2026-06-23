@@ -1,0 +1,7 @@
+{
+  "project": "Spring",
+  "experts": 4,
+  "cohens_kappa": 0.85,
+  "feedback_collected": "Decoupling agreement",
+  "summary": "Experts recommended manual review for boundary-spanning utility classes where automated splitting could over-fragment the framework core."
+}

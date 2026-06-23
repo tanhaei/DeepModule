@@ -57,6 +57,16 @@ A full Tree-sitter/CodeBERT setup can be plugged in for publication-scale experi
 python main.py --project_dir /path/to/java/project --clusters 12 --epochs 100 --ground_truth expert_reference.csv --output_dir outputs
 ```
 
+## Statistical significance (RQ1)
+
+The per-project MoJoFM improvement over the strongest non-DeepModule baseline is
+assessed with a paired Wilcoxon signed-rank test over the 10 repeated runs
+(Section 4.4). Recompute it from the released per-run data with:
+
+```bash
+python compute_significance.py --per_run data/releases/v3.0/benchmark_outputs/per_run_mojofm.csv
+```
+
 ## Manuscript v3.0 replication package
 
 The manuscript-level replication package is available under:

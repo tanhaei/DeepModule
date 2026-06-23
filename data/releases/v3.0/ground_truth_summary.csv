@@ -1,0 +1,7 @@
+Project,Domain,LOC,Files,Experts,Cohens_kappa,Selected_K
+Ant,Build tool,180000,1200,4,0.87,12
+Hadoop,Distributed computing,620000,4800,5,0.82,34
+Spring,Application framework,410000,3200,4,0.85,26
+MyBatis,Data-mapping framework,95000,650,3,0.88,8
+Eclipse,IDE infrastructure,550000,4100,5,0.81,28
+Tomcat,Web server,320000,2300,4,0.84,16

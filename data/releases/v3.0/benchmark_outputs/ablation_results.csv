@@ -1,0 +1,8 @@
+Variant,Purpose,Mean_MoJoFM,Mean_MQ,Semantic_silhouette
+Full DeepModule,GAT + CodeBERT + directed modularity + semantic loss + balance,83.7,0.62,0.65
+Without semantic embeddings,Tests the value of CodeBERT features,66.4,0.58,0.11
+Without graph attention,Replaces GAT with a non-attentive GCN encoder,74.8,0.49,0.54
+Without semantic loss,Keeps semantic input but removes Lsem,78.1,0.64,0.38
+Without balance loss,Removes Lbal and tests cluster collapse risk,52.3,0.31,0.59
+Structure-only clustering,Uses dependency graph features without semantic enrichment,65.1,0.60,0.07
+Semantic-only clustering,Uses CodeBERT vectors without graph dependencies,71.5,0.21,0.68
