@@ -1,7 +1,0 @@
-{
-  "project": "Tomcat",
-  "experts": 4,
-  "cohens_kappa": 0.84,
-  "feedback_collected": "Protocol separation",
-  "summary": "Experts supported a clearer boundary between HTTP protocol handling and session persistence."
-}

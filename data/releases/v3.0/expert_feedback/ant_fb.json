@@ -1,7 +1,0 @@
-{
-  "project": "Ant",
-  "experts": 4,
-  "cohens_kappa": 0.87,
-  "feedback_collected": "Boundary alignment",
-  "summary": "Experts agreed that task execution and compiler adapters should be separated to preserve build-tool extensibility."
-}

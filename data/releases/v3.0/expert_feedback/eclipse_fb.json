@@ -1,7 +1,0 @@
-{
-  "project": "Eclipse",
-  "experts": 5,
-  "cohens_kappa": 0.81,
-  "feedback_collected": "Component modularity",
-  "summary": "Experts favored a parsing facade to reduce dependency propagation across IDE components."
-}
